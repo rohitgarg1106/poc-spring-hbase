@@ -1,14 +1,17 @@
 package poc.experimentation.springhbase.pocspringhbase.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.Admin;
-import org.apache.hadoop.hbase.client.Connection;
-import org.apache.hadoop.hbase.client.TableDescriptor;
+import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.shaded.org.apache.avro.reflect.AvroIgnore;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import poc.experimentation.springhbase.pocspringhbase.model.HBaseConnection;
+import poc.experimentation.springhbase.pocspringhbase.request.PutDataRequest;
 
 import java.io.IOException;
 import java.util.List;
@@ -20,6 +23,15 @@ public class CRUDService {
 
     @Autowired
     private HBaseConnection connection;
+
+    @Autowired
+    private ObjectMapper mapper;
+
+    private Table getTable(Connection conn, String namespace, String tableName) throws IOException {
+        TableName table = TableName.valueOf(namespace, tableName);
+        return conn.getTable(table);
+
+    }
 
     public List<String> listTables() throws IOException {
         TableName table = TableName.valueOf("default", "user_audience_map");
@@ -42,5 +54,20 @@ public class CRUDService {
         desc.addFamily(new HColumnDescriptor(family2));
         admin.createTable(desc);
 
+    }
+
+    public void addData(PutDataRequest request) throws IOException {
+        Connection conn = this.connection.getConnection();
+        byte[] rowKeyBytes = Bytes.toBytes(request.getRow());
+        byte[] objectBytes = mapper.writeValueAsBytes(request.getData());
+        byte[] familyBytes = request.getColumnFamily().getBytes();
+        byte[] qualifierBytes = request.getColumnQualifier().getBytes();
+
+        Put putOp = new Put(rowKeyBytes);
+        putOp.addColumn(familyBytes, qualifierBytes, objectBytes);
+
+        //perform put on table
+        Table table = getTable(conn, request.getNamespace(), request.getTableName());
+        table.put(putOp);
     }
 }
