@@ -1,20 +1,31 @@
 package poc.experimentation.springhbase.pocspringhbase.controller;
 
-import org.apache.hadoop.hbase.client.Connection;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import poc.experimentation.springhbase.pocspringhbase.service.CRUDService;
+
+import java.io.IOException;
 
 @RestController
 public class CRUDController {
 
-    @Autowired
-    private Connection connection;
+    private CRUDService crudService;
+
+    public CRUDController(CRUDService crudService) {
+        this.crudService = crudService;
+    }
 
     @GetMapping(value = "/api/v1/getAllTables")
-    public ResponseEntity getAllTables(){
-        return ResponseEntity.ok(connection);
+    public ResponseEntity listTables() {
+        try {
+            crudService.listTables();
+            return ResponseEntity.ok().build();
+        }
+        catch (Exception e){
+            return ResponseEntity.internalServerError().build();
+
+        }
     }
 
 }
