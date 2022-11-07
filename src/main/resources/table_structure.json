@@ -1,0 +1,17 @@
+{
+
+  "ab" : {//  namespace
+    "user_audience_map": {//  table
+      "data": { //  cf
+        "%s_%suserXXaudXX": { //row
+          "ua": {value = "", timestamp = ""} // cq: value
+        }
+      },
+      "country": {}
+    },
+    "audience_user_map" : {
+      "data": {},
+      "country": {}
+    }
+  }
+}
