@@ -1,21 +1,43 @@
 package poc.experimentation.springhbase.pocspringhbase.repository;
 
-import org.apache.hadoop.hbase.client.Connection;
-import org.apache.hadoop.hbase.client.Table;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.hadoop.hbase.HColumnDescriptor;
+import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import poc.experimentation.springhbase.pocspringhbase.request.PutDataRequest;
+import poc.experimentation.springhbase.pocspringhbase.exception.HBaseTableExistsException;
+import poc.experimentation.springhbase.pocspringhbase.model.HBaseConnection;
+import poc.experimentation.springhbase.pocspringhbase.model.HBaseData;
 
 import java.io.IOException;
 import java.util.List;
 
 @Repository
-public interface CRUDRepository {
+public class CRUDRepository{
 
-    public List<String> listTables() throws IOException ;
+    @Autowired
+    private HBaseConnection connection;
 
-    public void createDefaultTable()  throws IOException ;
+    @Autowired
+    private ObjectMapper mapper;
 
-    public void addData(PutDataRequest request)  throws IOException ;
+    public void createTable(String namespace, String tableName, List<String> cf) throws IOException, HBaseTableExistsException {
+        connection.createTable(namespace, tableName, cf);
+    }
 
+    public List<String> listTableNames(String namespace) throws IOException {
+        return connection.listTableNames(namespace);
+    }
 
+    public void addData(HBaseData data) throws IOException {
+        connection.putData(data);
+    }
+
+    public byte[] getData(HBaseData hbaseData) throws IOException {
+        return connection.getData(hbaseData);
+    }
 }
+
+

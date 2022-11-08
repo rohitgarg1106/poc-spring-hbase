@@ -1,44 +1,50 @@
 package poc.experimentation.springhbase.pocspringhbase.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.hadoop.hbase.HColumnDescriptor;
-import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.*;
-import org.apache.hadoop.hbase.shaded.org.apache.avro.reflect.AvroIgnore;
-import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.commons.lang3.SerializationUtils;
+import org.apache.hbase.thirdparty.com.google.gson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import poc.experimentation.springhbase.pocspringhbase.model.HBaseConnection;
+import poc.experimentation.springhbase.pocspringhbase.exception.HBaseTableExistsException;
+import poc.experimentation.springhbase.pocspringhbase.model.HBaseData;
 import poc.experimentation.springhbase.pocspringhbase.repository.CRUDRepository;
-import poc.experimentation.springhbase.pocspringhbase.repository.CRUDRepositoryImpl;
+import poc.experimentation.springhbase.pocspringhbase.request.CreateMapStoreRequest;
+import poc.experimentation.springhbase.pocspringhbase.request.GetDataRequest;
 import poc.experimentation.springhbase.pocspringhbase.request.PutDataRequest;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Service
 public class CRUDService {
 
     @Autowired
-    private CRUDRepositoryImpl crudRepository;
+    private CRUDRepository crudRepository;
 
     @Autowired
     private ObjectMapper mapper;
 
-    public List<String> listTables() throws IOException {
-       return crudRepository.listTables();
+    public List<String> listTables(String namespace) throws IOException {
+       return crudRepository.listTableNames(namespace);
     }
 
-    public void createDefaultTable() throws IOException {
-     crudRepository.createDefaultTable();
+    public void createTable(CreateMapStoreRequest request) throws IOException, HBaseTableExistsException {
 
+        crudRepository.createTable(request.getNamespace(), request.getTableName(), request.getCf());
     }
 
     public void addData(PutDataRequest request) throws IOException {
-       crudRepository.addData(request);
+        HBaseData data = request.getHBaseData();
+        crudRepository.addData(data);
+    }
+
+
+    public Object getData(GetDataRequest request) throws IOException, ClassNotFoundException {
+        HBaseData hbaseData = request.getHBaseData();
+        byte[] byteArray = crudRepository.getData(hbaseData);
+        return mapper.readValue(byteArray, Object.class);
     }
 }

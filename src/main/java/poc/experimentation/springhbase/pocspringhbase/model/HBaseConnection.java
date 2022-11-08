@@ -107,6 +107,15 @@ public class HBaseConnection {
     }
 
     /**
+     * lists all the tables in a namespace present as strings
+     * */
+    public List<String> listTableNames(String namespace) throws IOException {
+        byte[] namespaceBytes = Bytes.toBytes(namespace);
+        List<TableDescriptor> tableNameList = this.admin.listTableDescriptorsByNamespace(namespaceBytes);
+        return tableNameList.stream().map(td -> td.getTableName().getNameAsString()).collect(Collectors.toList());
+    }
+
+    /**
     * creates a table using
     * @param namespace
     * @param tableName

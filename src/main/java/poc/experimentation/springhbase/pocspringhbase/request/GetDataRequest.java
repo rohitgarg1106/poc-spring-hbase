@@ -7,13 +7,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import poc.experimentation.springhbase.pocspringhbase.model.HBaseData;
 
-import javax.validation.constraints.NotNull;
-import java.util.Map;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PutDataRequest {
+public class GetDataRequest {
 
     @JsonProperty("namespace")
     private String namespace;
@@ -30,9 +27,6 @@ public class PutDataRequest {
     @JsonProperty("colum_qualifier")
     private String columnQualifier;
 
-    @JsonProperty("data")
-    private Map<?,?> data;
-
     @JsonIgnore
     public HBaseData getHBaseData(){
         HBaseData hdata = new HBaseData();
@@ -41,7 +35,6 @@ public class PutDataRequest {
         hdata.setRow(this.row);
         hdata.setColumnFamily(this.columnFamily);
         hdata.setColumnQualifier(this.columnQualifier);
-        hdata.setData(this.data);
         return hdata;
     }
 }
