@@ -1,10 +1,6 @@
 package poc.experimentation.springhbase.pocspringhbase.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.hadoop.hbase.HColumnDescriptor;
-import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import poc.experimentation.springhbase.pocspringhbase.exception.HBaseTableExistsException;
@@ -15,7 +11,7 @@ import java.io.IOException;
 import java.util.List;
 
 @Repository
-public class CRUDRepository{
+public class HBaseCrudRepository {
 
     @Autowired
     private HBaseConnection connection;

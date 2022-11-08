@@ -28,7 +28,7 @@ public class HBaseData {
     private String columnQualifier;
 
 
-    private Map<?,?> data;
+    private Object data;
 
     private long timestamp;
 
