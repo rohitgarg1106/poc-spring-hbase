@@ -3,7 +3,7 @@ package poc.experimentation.springhbase.pocspringhbase.controller;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import poc.experimentation.springhbase.pocspringhbase.ab.ScanTableRequest;
+import poc.experimentation.springhbase.pocspringhbase.request.ScanTableRequest;
 import poc.experimentation.springhbase.pocspringhbase.request.CreateMapStoreRequest;
 import poc.experimentation.springhbase.pocspringhbase.request.GetDataRequest;
 import poc.experimentation.springhbase.pocspringhbase.request.PutDataRequest;

@@ -9,7 +9,7 @@ import org.apache.hadoop.hbase.filter.RowFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import poc.experimentation.springhbase.pocspringhbase.ab.ScanTableRequest;
+import poc.experimentation.springhbase.pocspringhbase.request.ScanTableRequest;
 import poc.experimentation.springhbase.pocspringhbase.exception.HBaseTableExistsException;
 import poc.experimentation.springhbase.pocspringhbase.model.HBaseData;
 import poc.experimentation.springhbase.pocspringhbase.repository.HBaseCrudRepository;
@@ -71,6 +71,10 @@ public class HBaseCrudService {
     public Result getRow(GetRowDto getRowDto) throws IOException {
         return repository.getRow(getRowDto.getNamespace(), getRowDto.getTableName(), getRowDto.getRow());
 
+    }
+
+    public List<Result> scanTable(ScanTableDto scanTableDto) throws IOException {
+        return repository.scanTable(scanTableDto);
     }
 
 }

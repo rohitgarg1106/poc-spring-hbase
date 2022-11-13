@@ -1,9 +1,8 @@
-package poc.experimentation.springhbase.pocspringhbase.ab;
+package poc.experimentation.springhbase.pocspringhbase.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Data
 @NoArgsConstructor

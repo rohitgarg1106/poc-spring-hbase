@@ -3,9 +3,7 @@ package poc.experimentation.springhbase.pocspringhbase.ab;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.RegexStringComparator;
@@ -19,6 +17,7 @@ import poc.experimentation.springhbase.pocspringhbase.model.HBaseConnection;
 import poc.experimentation.springhbase.pocspringhbase.model.HBaseRow;
 import poc.experimentation.springhbase.pocspringhbase.request.BulkPutDto;
 import poc.experimentation.springhbase.pocspringhbase.request.GetRowDto;
+import poc.experimentation.springhbase.pocspringhbase.request.ScanTableDto;
 import poc.experimentation.springhbase.pocspringhbase.service.HBaseCrudService;
 
 import java.io.IOException;
@@ -128,48 +127,48 @@ public class ABService {
         hBaseCrudService.bulkPut(dto);
     }
 
-    private void bulkAddEntityAudienceMap(List<EntityAudienceMap> entityAudienceMaps, String entityType) throws IOException {
-        List<Put> putops = new ArrayList<>();
-        Table table = connection.getTable(HBaseConstants.DEFAULT_NAMESPACE, HBaseConstants.USER_AUDIENCE_MAP);
-        for (EntityAudienceMap map : entityAudienceMaps) {
-            byte[] rowKeyBytes;
-            if (entityType.equalsIgnoreCase(HBaseConstants.DEFAULT_ENTITY_TYPE)) {
-                rowKeyBytes = HbaseUtils.getUserAudienceRowKey(map.getEntityAudienceMapData().getAudienceId(), map.getEntityAudienceMapData().getUserId());
-            } else {
-                rowKeyBytes = HbaseUtils.getEntityAudienceRowKey(map.getEntityAudienceMapData().getAudienceId(), map.getEntityAudienceMapData().getEntityId(), entityType);
-            }
+//    private void bulkAddEntityAudienceMap(List<EntityAudienceMap> entityAudienceMaps, String entityType) throws IOException {
+//        List<Put> putops = new ArrayList<>();
+//        Table table = connection.getTable(HBaseConstants.DEFAULT_NAMESPACE, HBaseConstants.USER_AUDIENCE_MAP);
+//        for (EntityAudienceMap map : entityAudienceMaps) {
+//            byte[] rowKeyBytes;
+//            if (entityType.equalsIgnoreCase(HBaseConstants.DEFAULT_ENTITY_TYPE)) {
+//                rowKeyBytes = HbaseUtils.getUserAudienceRowKey(map.getEntityAudienceMapData().getAudienceId(), map.getEntityAudienceMapData().getUserId());
+//            } else {
+//                rowKeyBytes = HbaseUtils.getEntityAudienceRowKey(map.getEntityAudienceMapData().getAudienceId(), map.getEntityAudienceMapData().getEntityId(), entityType);
+//            }
+//
+//            Put p = new Put(rowKeyBytes);
+//            byte[] mapDataBytes = mapper.writeValueAsBytes(map.getEntityAudienceMapData());
+//            byte[] countryDataBytes = mapper.writeValueAsBytes(map.getCountry());
+//
+//            p.addColumn(this.columnFamily, this.ua_qualifier, mapDataBytes);
+//            p.addColumn(this.columnFamily, this.country_qualifier, countryDataBytes);
+//            putops.add(p);
+//        }
+//        table.put(putops);
+//    }
 
-            Put p = new Put(rowKeyBytes);
-            byte[] mapDataBytes = mapper.writeValueAsBytes(map.getEntityAudienceMapData());
-            byte[] countryDataBytes = mapper.writeValueAsBytes(map.getCountry());
-
-            p.addColumn(this.columnFamily, this.ua_qualifier, mapDataBytes);
-            p.addColumn(this.columnFamily, this.country_qualifier, countryDataBytes);
-            putops.add(p);
-        }
-        table.put(putops);
-    }
-
-    private void bulkAddAudienceEntityMap(List<AudienceEntityMap> audienceEntityMaps, String entityType) throws IOException {
-        List<Put> putops = new ArrayList<>();
-        Table table = connection.getTable(HBaseConstants.DEFAULT_NAMESPACE, HBaseConstants.AUDIENCE_USER_MAP);
-        for (AudienceEntityMap map : audienceEntityMaps) {
-            byte[] rowKeyBytes = null;
-            if (entityType.equalsIgnoreCase(HBaseConstants.DEFAULT_ENTITY_TYPE)) {
-                rowKeyBytes = HbaseUtils.getAudienceEntityRowKey(map.getAudienceEntityMapData().getAudienceId().toString(), map.getAudienceEntityMapData().getUserId().toString());
-            } else {
-                rowKeyBytes = HbaseUtils.getAudienceEntityRowKey(map.getAudienceEntityMapData().getAudienceId().toString(), map.getAudienceEntityMapData().getEntityId());
-            }
-
-            Put p = new Put(rowKeyBytes);
-            byte[] mapDataBytes = mapper.writeValueAsBytes(map.getAudienceEntityMapData());
-            byte[] countryDataBytes = mapper.writeValueAsBytes(map.getCountry());
-            p.addColumn(this.columnFamily, this.au_qualifier, mapDataBytes);
-            p.addColumn(this.columnFamily, this.country_qualifier, countryDataBytes);
-            putops.add(p);
-        }
-        table.put(putops);
-    }
+//    private void bulkAddAudienceEntityMap(List<AudienceEntityMap> audienceEntityMaps, String entityType) throws IOException {
+//        List<Put> putops = new ArrayList<>();
+//        Table table = connection.getTable(HBaseConstants.DEFAULT_NAMESPACE, HBaseConstants.AUDIENCE_USER_MAP);
+//        for (AudienceEntityMap map : audienceEntityMaps) {
+//            byte[] rowKeyBytes = null;
+//            if (entityType.equalsIgnoreCase(HBaseConstants.DEFAULT_ENTITY_TYPE)) {
+//                rowKeyBytes = HbaseUtils.getAudienceEntityRowKey(map.getAudienceEntityMapData().getAudienceId().toString(), map.getAudienceEntityMapData().getUserId().toString());
+//            } else {
+//                rowKeyBytes = HbaseUtils.getAudienceEntityRowKey(map.getAudienceEntityMapData().getAudienceId().toString(), map.getAudienceEntityMapData().getEntityId());
+//            }
+//
+//            Put p = new Put(rowKeyBytes);
+//            byte[] mapDataBytes = mapper.writeValueAsBytes(map.getAudienceEntityMapData());
+//            byte[] countryDataBytes = mapper.writeValueAsBytes(map.getCountry());
+//            p.addColumn(this.columnFamily, this.au_qualifier, mapDataBytes);
+//            p.addColumn(this.columnFamily, this.country_qualifier, countryDataBytes);
+//            putops.add(p);
+//        }
+//        table.put(putops);
+//    }
 
     private EntityAudienceMapData createEntityAudienceMapData(Integer audienceId, String entityId, String entityType) {
         if (entityType.equalsIgnoreCase(HBaseConstants.DEFAULT_ENTITY_TYPE)) {
@@ -190,50 +189,6 @@ public class ABService {
         return audienceEntityMapData;
     }
 
-//    public List<String> getAudiencesForEntityOld(String entityId, String entityType) throws IOException {
-//        String pattern = (entityType.equalsIgnoreCase(HBaseConstants.DEFAULT_ENTITY_TYPE)) ? entityId : (entityType + "_" + entityId);
-//        String prefixRowKey = String.format("%s_", HbaseUtils.getSha1HexString(pattern));
-//        Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL, new RegexStringComparator(prefixRowKey + "*"));
-//        Set<String> audienceSet = new HashSet<>();
-//        String[] lastRowKey = {null};
-//        boolean includeStartRow = true;
-//        while (true) {
-//            String startRowKey;
-//            if (lastRowKey[0] != null) {
-//                startRowKey = lastRowKey[0];
-//                includeStartRow = false;
-//            } else {
-//                startRowKey = prefixRowKey;
-//                includeStartRow = true;
-//            }
-//            byte[] stopRowBytes = HbaseUtils.calculateTheClosestNextRowKeyForPrefix(Bytes.toBytes(startRowKey));
-//            List<Result> resultList = connection.scanTable(HBaseConstants.DEFAULT_NAMESPACE, HBaseConstants.USER_AUDIENCE_MAP, this.scan_limit, startRowKey, stopRowBytes.toString(), filter, includeStartRow);
-//
-//            if (resultList == null || resultList.isEmpty()) {
-//                break;
-//            }
-//
-//            List<EntityAudienceMapData> entityAudienceMapDataList = resultList.stream().map(r -> {
-//                byte[] value = r.getValue(this.columnFamily, this.ua_qualifier);
-//                try {
-//                    return this.mapper.readValue(value, EntityAudienceMapData.class);
-//                } catch (IOException e) {
-//                    return null;
-//                }
-//            }).filter(Objects::nonNull).collect(Collectors.toList());
-//
-//            lastRowKey[0] = HbaseUtils.getLastRowKeyOld(entityAudienceMapDataList, entityType);
-//            List<String> audienceIdList = entityAudienceMapDataList.stream()
-//                    .map(ea -> ea.getAudienceId())
-//                    .filter(Objects::nonNull)
-//                    .map(String::valueOf).collect(Collectors.toList());
-//            audienceSet.addAll(audienceIdList);
-//        }
-//
-//        return new ArrayList<>(audienceSet);
-//
-//    }
-
     public List<String> getAudiencesForEntity(String entityId, String entityType) throws IOException {
         String pattern = (entityType.equalsIgnoreCase(HBaseConstants.DEFAULT_ENTITY_TYPE)) ? entityId : (entityType + "_" + entityId);
         String prefixRowKey = String.format("%s_", HbaseUtils.getSha1HexString(pattern));
@@ -251,7 +206,17 @@ public class ABService {
                 includeStartRow = true;
             }
             byte[] stopRowBytes = HbaseUtils.calculateTheClosestNextRowKeyForPrefix(startRowKey);
-            List<Result> resultList = connection.scanTable(HBaseConstants.DEFAULT_NAMESPACE, HBaseConstants.USER_AUDIENCE_MAP, this.scan_limit, startRowKey, stopRowBytes, filter, includeStartRow);
+
+            ScanTableDto scanTableDto = ScanTableDto.builder()
+                    .namespace(HBaseConstants.DEFAULT_NAMESPACE)
+                    .tableName(HBaseConstants.USER_AUDIENCE_MAP)
+                    .limit(this.scan_limit)
+                    .startRow(startRowKey)
+                    .endRow(stopRowBytes)
+                    .filter(filter)
+                    .includeStartRow(includeStartRow).build();
+
+            List<Result> resultList = hBaseCrudService.scanTable(scanTableDto);
 
             if (resultList == null || resultList.isEmpty()) {
                 break;
@@ -279,8 +244,8 @@ public class ABService {
     }
 
     public List<String> getEntitiesForAudience(Integer audienceId, String entityType) throws IOException {
-        String prefixKey = String.format("%s_*", HbaseUtils.getSha1HexString(audienceId.toString()));
-        Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL, new RegexStringComparator(prefixKey));
+        String prefixKey = String.format("%s_", HbaseUtils.getSha1HexString(audienceId.toString()));
+        Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL, new RegexStringComparator(prefixKey + "*"));
         String[] lastRowKey = {null};
         Set<String> entitySet = new HashSet<>();
         boolean includeStartRow = true;
@@ -290,7 +255,17 @@ public class ABService {
                 prefixKey = lastRowKey[0];
             }
             byte[] stopRowBytes = HbaseUtils.calculateTheClosestNextRowKeyForPrefix(Bytes.toBytes(prefixKey));
-            List<Result> resultList = connection.scanTable(HBaseConstants.DEFAULT_NAMESPACE, HBaseConstants.AUDIENCE_USER_MAP, this.scan_limit, prefixKey, stopRowBytes.toString(), filter, includeStartRow);
+
+            ScanTableDto scanTableDto = ScanTableDto.builder()
+                    .namespace(HBaseConstants.DEFAULT_NAMESPACE)
+                    .tableName(HBaseConstants.AUDIENCE_USER_MAP)
+                    .limit(this.scan_limit)
+                    .startRow(prefixKey.getBytes())
+                    .endRow(stopRowBytes)
+                    .filter(filter)
+                    .includeStartRow(includeStartRow).build();
+
+            List<Result> resultList = hBaseCrudService.scanTable(scanTableDto);
             if (resultList == null || resultList.isEmpty()) {
                 break;
             }
