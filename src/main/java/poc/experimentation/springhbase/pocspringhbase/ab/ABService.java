@@ -18,6 +18,7 @@ import poc.experimentation.springhbase.pocspringhbase.model.HBaseColumn;
 import poc.experimentation.springhbase.pocspringhbase.model.HBaseConnection;
 import poc.experimentation.springhbase.pocspringhbase.model.HBaseRow;
 import poc.experimentation.springhbase.pocspringhbase.request.BulkPutDto;
+import poc.experimentation.springhbase.pocspringhbase.request.GetRowDto;
 import poc.experimentation.springhbase.pocspringhbase.service.HBaseCrudService;
 
 import java.io.IOException;
@@ -45,7 +46,7 @@ public class ABService {
 
     public boolean doesMappingExists(String audienceId, String entityId) throws IOException {
         String rowKey = HbaseUtils.getAudienceUserMapRowKey(audienceId, entityId);
-        Result result = connection.getRow(HBaseConstants.DEFAULT_NAMESPACE, HBaseConstants.AUDIENCE_USER_MAP, rowKey);
+        Result result = hBaseCrudService.getRow(new GetRowDto(HBaseConstants.DEFAULT_NAMESPACE, HBaseConstants.AUDIENCE_USER_MAP, rowKey));
         log.info(String.valueOf(result));
         return !(result == null || result.isEmpty());
     }

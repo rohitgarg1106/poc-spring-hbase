@@ -6,19 +6,14 @@ import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.RegexStringComparator;
 import org.apache.hadoop.hbase.filter.RowFilter;
-import org.apache.hadoop.hbase.shaded.org.apache.commons.codec.binary.Base64;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import poc.experimentation.springhbase.pocspringhbase.ab.HbaseUtils;
 import poc.experimentation.springhbase.pocspringhbase.ab.ScanTableRequest;
 import poc.experimentation.springhbase.pocspringhbase.exception.HBaseTableExistsException;
 import poc.experimentation.springhbase.pocspringhbase.model.HBaseData;
 import poc.experimentation.springhbase.pocspringhbase.repository.HBaseCrudRepository;
-import poc.experimentation.springhbase.pocspringhbase.request.BulkPutDto;
-import poc.experimentation.springhbase.pocspringhbase.request.CreateMapStoreRequest;
-import poc.experimentation.springhbase.pocspringhbase.request.GetDataRequest;
-import poc.experimentation.springhbase.pocspringhbase.request.PutDataRequest;
+import poc.experimentation.springhbase.pocspringhbase.request.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -69,8 +64,13 @@ public class HBaseCrudService {
         }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    public boolean bulkPut(BulkPutDto dto){
-        return repository.bulkPut(dto);
+    public boolean bulkPut(BulkPutDto bulkPutDto){
+        return repository.bulkPut(bulkPutDto);
+    }
+
+    public Result getRow(GetRowDto getRowDto) throws IOException {
+        return repository.getRow(getRowDto.getNamespace(), getRowDto.getTableName(), getRowDto.getRow());
+
     }
 
 }
