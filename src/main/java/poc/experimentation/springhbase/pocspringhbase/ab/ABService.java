@@ -1,5 +1,6 @@
 package poc.experimentation.springhbase.pocspringhbase.ab;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hadoop.hbase.client.Put;
@@ -13,7 +14,11 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import poc.experimentation.springhbase.pocspringhbase.constants.HBaseConstants;
+import poc.experimentation.springhbase.pocspringhbase.model.HBaseColumn;
 import poc.experimentation.springhbase.pocspringhbase.model.HBaseConnection;
+import poc.experimentation.springhbase.pocspringhbase.model.HBaseRow;
+import poc.experimentation.springhbase.pocspringhbase.request.BulkPutDto;
+import poc.experimentation.springhbase.pocspringhbase.service.HBaseCrudService;
 
 import java.io.IOException;
 import java.util.*;
@@ -26,6 +31,8 @@ public class ABService {
     @Autowired
     private HBaseConnection connection;
 
+    @Autowired
+    private HBaseCrudService hBaseCrudService;
     @Autowired
     private ObjectMapper mapper;
 
@@ -72,8 +79,52 @@ public class ABService {
     }
 
     private void bulkHBaseAdd(List<AudienceEntityMap> audienceEntityMaps, List<EntityAudienceMap> entityAudienceMaps, String entityType) throws IOException {
-        bulkAddAudienceEntityMap(audienceEntityMaps, entityType);
-        bulkAddEntityAudienceMap(entityAudienceMaps, entityType);
+//        bulkAddAudienceEntityMap(audienceEntityMaps, entityType);
+        bulkAddAudienceEntityMapOp(audienceEntityMaps, entityType);
+//        bulkAddEntityAudienceMap(entityAudienceMaps, entityType);
+        bulkAddEntityAudienceMapOp(entityAudienceMaps, entityType);
+    }
+
+    private void bulkAddEntityAudienceMapOp(List<EntityAudienceMap> entityAudienceMaps, String entityType) throws JsonProcessingException {
+        BulkPutDto dto = new BulkPutDto(HBaseConstants.DEFAULT_NAMESPACE, HBaseConstants.USER_AUDIENCE_MAP);
+        for (EntityAudienceMap map : entityAudienceMaps) {
+            HBaseRow row = new HBaseRow();
+            if (entityType.equalsIgnoreCase(HBaseConstants.DEFAULT_ENTITY_TYPE)) {
+                row.setRowKeyBytes(HbaseUtils.getUserAudienceRowKey(map.getEntityAudienceMapData().getAudienceId(), map.getEntityAudienceMapData().getUserId()));
+            } else {
+                row.setRowKeyBytes(HbaseUtils.getEntityAudienceRowKey(map.getEntityAudienceMapData().getAudienceId(), map.getEntityAudienceMapData().getEntityId(), entityType));
+            }
+
+            byte[] mapDataBytes = mapper.writeValueAsBytes(map.getEntityAudienceMapData());
+            byte[] countryDataBytes = mapper.writeValueAsBytes(map.getCountry());
+
+            row.getColumns().add(new HBaseColumn(this.columnFamily, this.ua_qualifier, mapDataBytes));
+            row.getColumns().add(new HBaseColumn(this.columnFamily, this.country_qualifier, countryDataBytes));
+            dto.getRows().add(row);
+        }
+        hBaseCrudService.bulkPut(dto);
+    }
+
+    private void bulkAddAudienceEntityMapOp(List<AudienceEntityMap> audienceEntityMaps, String entityType) throws JsonProcessingException {
+        BulkPutDto dto = new BulkPutDto(HBaseConstants.DEFAULT_NAMESPACE, HBaseConstants.AUDIENCE_USER_MAP);
+
+        for (AudienceEntityMap map : audienceEntityMaps) {
+            HBaseRow row = new HBaseRow();
+            if (entityType.equalsIgnoreCase(HBaseConstants.DEFAULT_ENTITY_TYPE)) {
+                row.setRowKeyBytes(HbaseUtils.getAudienceEntityRowKey(map.getAudienceEntityMapData().getAudienceId().toString(), map.getAudienceEntityMapData().getUserId().toString()));
+            } else {
+                row.setRowKeyBytes(HbaseUtils.getAudienceEntityRowKey(map.getAudienceEntityMapData().getAudienceId().toString(), map.getAudienceEntityMapData().getEntityId()));
+            }
+
+            byte[] mapDataBytes = mapper.writeValueAsBytes(map.getAudienceEntityMapData());
+            byte[] countryDataBytes = mapper.writeValueAsBytes(map.getCountry());
+
+            row.getColumns().add(new HBaseColumn(this.columnFamily, this.au_qualifier, mapDataBytes));
+            row.getColumns().add(new HBaseColumn(this.columnFamily, this.country_qualifier, countryDataBytes));
+            dto.getRows().add(row);
+        }
+        
+        hBaseCrudService.bulkPut(dto);
     }
 
     private void bulkAddEntityAudienceMap(List<EntityAudienceMap> entityAudienceMaps, String entityType) throws IOException {

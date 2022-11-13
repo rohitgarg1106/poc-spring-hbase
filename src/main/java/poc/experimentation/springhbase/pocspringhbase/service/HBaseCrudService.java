@@ -15,6 +15,7 @@ import poc.experimentation.springhbase.pocspringhbase.ab.ScanTableRequest;
 import poc.experimentation.springhbase.pocspringhbase.exception.HBaseTableExistsException;
 import poc.experimentation.springhbase.pocspringhbase.model.HBaseData;
 import poc.experimentation.springhbase.pocspringhbase.repository.HBaseCrudRepository;
+import poc.experimentation.springhbase.pocspringhbase.request.BulkPutDto;
 import poc.experimentation.springhbase.pocspringhbase.request.CreateMapStoreRequest;
 import poc.experimentation.springhbase.pocspringhbase.request.GetDataRequest;
 import poc.experimentation.springhbase.pocspringhbase.request.PutDataRequest;
@@ -67,4 +68,11 @@ public class HBaseCrudService {
             }
         }).filter(Objects::nonNull).collect(Collectors.toList());
     }
+
+    public boolean bulkPut(BulkPutDto dto){
+        return repository.bulkPut(dto);
+    }
+
 }
+
+//getrow

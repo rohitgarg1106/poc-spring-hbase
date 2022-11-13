@@ -14,6 +14,7 @@ import poc.experimentation.springhbase.pocspringhbase.ab.HbaseUtils;
 import poc.experimentation.springhbase.pocspringhbase.exception.HBaseTableExistsException;
 import poc.experimentation.springhbase.pocspringhbase.model.HBaseConnection;
 import poc.experimentation.springhbase.pocspringhbase.model.HBaseData;
+import poc.experimentation.springhbase.pocspringhbase.request.BulkPutDto;
 
 import java.io.IOException;
 import java.util.List;
@@ -51,6 +52,10 @@ public class HBaseCrudRepository {
 
     public List<Result> scanTable(String namespace, String tableName, int limit, Filter filter) throws IOException {
         return connection.scanTable(namespace, tableName,limit,null,null,filter);
+    }
+
+    public boolean bulkPut(BulkPutDto dto) {
+        return connection.bulkPut(dto);
     }
 }
 

@@ -1,16 +1,19 @@
 package poc.experimentation.springhbase.pocspringhbase.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javafx.scene.control.Tab;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.exceptions.IllegalArgumentIOException;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.util.Bytes;
 import poc.experimentation.springhbase.pocspringhbase.constants.HBaseConstants;
 import poc.experimentation.springhbase.pocspringhbase.exception.HBaseTableExistsException;
+import poc.experimentation.springhbase.pocspringhbase.request.BulkPutDto;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -415,6 +418,29 @@ public class HBaseConnection {
         log.info("Column value appended successfully");
     }
 
+    public boolean bulkPut(BulkPutDto dto){
+        try {
+            Table table = getTable(dto.getNamespace(), dto.getTableName());
+            if(dto.getRows() == null || dto.getRows().isEmpty()){
+                throw new IllegalArgumentException("Expected at least 1 row in list of rows but 0 provided");
+            }
+            List<Put> putOps = new ArrayList<>();
+            dto.getRows().stream().forEach(row -> {
+                Put p = new Put(row.getRowKeyBytes());
+                row.getColumns().forEach(col -> {
+                    p.addColumn(col.getColumnFamily(), col.getColumnQualifier(), col.getData());
+                });
+                putOps.add(p);
+            });
+            table.put(putOps);
+            return true;
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+
+    }
 
 
 }
