@@ -7,6 +7,7 @@ import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.util.Bytes;
 import poc.experimentation.springhbase.pocspringhbase.constants.HBaseConstants;
 import poc.experimentation.springhbase.pocspringhbase.exception.HBaseTableExistsException;
@@ -259,7 +260,82 @@ public class HBaseConnection {
         Table table = getTable(namespace, tableName);
         ResultScanner resultScanner = table.getScanner(scan);
         List<Result> resultList = StreamSupport.stream(resultScanner.spliterator(), false).collect(Collectors.toList());
-        resultScanner.close();
+        return resultList;
+    }
+
+    public List<Result> scanTable(String namespace, String tableName, Integer limit, String startRow, String endRow, Filter filter,boolean includeStartRow) throws IOException {
+        Scan scan = new Scan();
+        if(limit != null){
+            scan.setLimit(limit);
+        }
+
+        if(startRow != null){
+            byte[] startRowBytes = Bytes.toBytes(startRow);
+            scan.withStartRow(startRowBytes, includeStartRow);
+        }
+
+        if(endRow != null){
+            byte[] stopRowBytes = Bytes.toBytes(endRow);
+            scan.withStopRow(stopRowBytes);
+        }
+
+        if(filter != null){
+            scan.setFilter(filter);
+        }
+
+        Table table = getTable(namespace, tableName);
+        ResultScanner resultScanner = table.getScanner(scan);
+        List<Result> resultList = StreamSupport.stream(resultScanner.spliterator(), false).collect(Collectors.toList());
+        return resultList;
+    }
+
+    public List<Result> scanTable(String namespace, String tableName, Integer limit, byte[] startRow, byte[] endRow, Filter filter,boolean includeStartRow) throws IOException {
+        Scan scan = new Scan();
+        if(limit != null){
+            scan.setLimit(limit);
+        }
+
+        if(startRow != null){
+            scan.withStartRow(startRow, includeStartRow);
+        }
+
+        if(endRow != null){
+            scan.withStopRow(endRow);
+        }
+
+        if(filter != null){
+            scan.setFilter(filter);
+        }
+
+        Table table = getTable(namespace, tableName);
+        ResultScanner resultScanner = table.getScanner(scan);
+        List<Result> resultList = StreamSupport.stream(resultScanner.spliterator(), false).collect(Collectors.toList());
+        return resultList;
+    }
+
+    public List<Result> scanTable(String namespace, String tableName, Integer limit, String startRow, String endRow, Filter filter) throws IOException {
+        Scan scan = new Scan();
+        if(limit != null){
+            scan.setLimit(limit);
+        }
+
+        if(startRow != null){
+            byte[] startRowBytes = Bytes.toBytes(startRow);
+            scan.withStartRow(startRowBytes);
+        }
+
+        if(endRow != null){
+            byte[] stopRowBytes = Bytes.toBytes(endRow);
+            scan.withStopRow(stopRowBytes);
+        }
+
+        if(filter != null){
+            scan.setFilter(filter);
+        }
+
+        Table table = getTable(namespace, tableName);
+        ResultScanner resultScanner = table.getScanner(scan);
+        List<Result> resultList = StreamSupport.stream(resultScanner.spliterator(), false).collect(Collectors.toList());
         return resultList;
     }
 

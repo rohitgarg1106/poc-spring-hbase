@@ -3,6 +3,7 @@ package poc.experimentation.springhbase.pocspringhbase.controller;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import poc.experimentation.springhbase.pocspringhbase.ab.ScanTableRequest;
 import poc.experimentation.springhbase.pocspringhbase.request.CreateMapStoreRequest;
 import poc.experimentation.springhbase.pocspringhbase.request.GetDataRequest;
 import poc.experimentation.springhbase.pocspringhbase.request.PutDataRequest;
@@ -62,6 +63,17 @@ public class HBaseCrudController {
             @RequestBody GetDataRequest request
     ) throws IOException, ClassNotFoundException {
         return ResponseEntity.ok().body(service.getData(request));
+    }
+
+    @GetMapping(value = "/api/v1/data/scanTable", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity scanTable(
+            @RequestBody ScanTableRequest request
+            ){
+        try {
+            return ResponseEntity.ok().body(service.scanTable(request));
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
 
