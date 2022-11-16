@@ -2,15 +2,11 @@ package poc.experimentation.springhbase.pocspringhbase.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.filter.Filter;
-import org.apache.hadoop.hbase.filter.RegexStringComparator;
-import org.apache.hadoop.hbase.filter.RowFilter;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import poc.experimentation.springhbase.pocspringhbase.ab.HbaseUtils;
 import poc.experimentation.springhbase.pocspringhbase.exception.HBaseTableExistsException;
 import poc.experimentation.springhbase.pocspringhbase.model.HBaseConnection;
 import poc.experimentation.springhbase.pocspringhbase.model.HBaseData;
@@ -18,7 +14,9 @@ import poc.experimentation.springhbase.pocspringhbase.request.BulkPutDto;
 import poc.experimentation.springhbase.pocspringhbase.request.ScanTableDto;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.NavigableMap;
 
 @Repository
 @Slf4j
@@ -47,8 +45,10 @@ public class HBaseCrudRepository {
         return connection.getData(hbaseData);
     }
 
-    public Result getRow(String namespace, String table, String row) throws IOException {
-        return connection.getRow(namespace, table, row);
+    public NavigableMap<byte[], NavigableMap<byte[],byte[]>> getRow(String namespace, String table, String row) throws IOException {
+        Result result =  connection.getRow(namespace, table, row);
+        return result.getNoVersionMap();
+
     }
 
     public List<Result> scanTable(String namespace, String tableName, int limit, Filter filter) throws IOException {
@@ -60,7 +60,24 @@ public class HBaseCrudRepository {
     }
 
     public boolean bulkPut(BulkPutDto dto) {
-        return connection.bulkPut(dto);
+        List<Put> putOps = new ArrayList<>();
+        if(dto.getRows() == null || dto.getRows().isEmpty()){
+            throw new IllegalArgumentException("Expected at least 1 row in list of rows but 0 provided");
+        }
+
+        dto.getRows().stream().forEach(row -> {
+                Put p = new Put(row.getRowKeyBytes());
+                row.getColumns().forEach(col -> {
+                    p.addColumn(col.getColumnFamily(), col.getColumnQualifier(), col.getData());
+                });
+                putOps.add(p);
+            });
+        return connection.bulkPut(dto.getNamespace(), dto.getTableName(), putOps);
+    }
+
+    public boolean containsColumns(String namespace, String tableName, String row, String columnFamily, String columnQualifier) throws IOException {
+        Result result = connection.getRow(namespace, tableName, row);
+        return result.containsColumn(columnFamily.getBytes(), columnFamily.getBytes());
     }
 }
 

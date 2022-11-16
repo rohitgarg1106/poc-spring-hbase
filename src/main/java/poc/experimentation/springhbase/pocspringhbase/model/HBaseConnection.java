@@ -418,21 +418,10 @@ public class HBaseConnection {
         log.info("Column value appended successfully");
     }
 
-    public boolean bulkPut(BulkPutDto dto){
-        try {
-            Table table = getTable(dto.getNamespace(), dto.getTableName());
-            if(dto.getRows() == null || dto.getRows().isEmpty()){
-                throw new IllegalArgumentException("Expected at least 1 row in list of rows but 0 provided");
-            }
-            List<Put> putOps = new ArrayList<>();
-            dto.getRows().stream().forEach(row -> {
-                Put p = new Put(row.getRowKeyBytes());
-                row.getColumns().forEach(col -> {
-                    p.addColumn(col.getColumnFamily(), col.getColumnQualifier(), col.getData());
-                });
-                putOps.add(p);
-            });
-            table.put(putOps);
+    public boolean bulkPut(String namespace, String tableName, List<Put> puts){
+        try{
+            Table table = getTable(namespace, tableName);
+            table.put(puts);
             return true;
         }
         catch (Exception e){
@@ -441,6 +430,29 @@ public class HBaseConnection {
         }
 
     }
+//    public boolean bulkPut(BulkPutDto dto){
+//        try {
+//            Table table = getTable(dto.getNamespace(), dto.getTableName());
+//            if(dto.getRows() == null || dto.getRows().isEmpty()){
+//                throw new IllegalArgumentException("Expected at least 1 row in list of rows but 0 provided");
+//            }
+//            List<Put> putOps = new ArrayList<>();
+//            dto.getRows().stream().forEach(row -> {
+//                Put p = new Put(row.getRowKeyBytes());
+//                row.getColumns().forEach(col -> {
+//                    p.addColumn(col.getColumnFamily(), col.getColumnQualifier(), col.getData());
+//                });
+//                putOps.add(p);
+//            });
+//            table.put(putOps);
+//            return true;
+//        }
+//        catch (Exception e){
+//            e.printStackTrace();
+//            return false;
+//        }
+//
+//    }
 
 
 }

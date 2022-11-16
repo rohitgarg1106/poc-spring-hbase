@@ -16,8 +16,7 @@ import poc.experimentation.springhbase.pocspringhbase.repository.HBaseCrudReposi
 import poc.experimentation.springhbase.pocspringhbase.request.*;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -68,9 +67,32 @@ public class HBaseCrudService {
         return repository.bulkPut(bulkPutDto);
     }
 
-    public Result getRow(GetRowDto getRowDto) throws IOException {
+    private NavigableMap<byte[], NavigableMap<byte[],byte[]>> getRow(GetRowDto getRowDto) throws IOException {
         return repository.getRow(getRowDto.getNamespace(), getRowDto.getTableName(), getRowDto.getRow());
 
+    }
+
+    public Map<String, Map<String,Object> > getRowValue(GetRowDto getRowDto) throws IOException {
+        NavigableMap<byte[], NavigableMap<byte[],byte[]>> nMap = getRow(getRowDto);
+        Map<String, Map<String,Object> > resultMap = new HashMap<>();
+        for(byte[] cf : nMap.keySet()){
+            String columnFamily = Bytes.toString(cf);
+            NavigableMap<byte[],byte[]> columnFamilyMap = nMap.get(cf);
+            HashMap<String, Object> resultCfMap = new HashMap<>();
+            for (byte[] cq : columnFamilyMap.keySet()){
+                String columnQualifier = Bytes.toString(cq);
+                byte[] objectBytes = columnFamilyMap.get(cq);
+                Object obj = mapper.readValue(objectBytes, Object.class);
+                resultCfMap.put(columnQualifier,obj);
+            }
+            resultMap.put(columnFamily, resultCfMap);
+        }
+
+        return resultMap;
+    }
+
+    public boolean containsColumns(ContainsColumnDto containsColumnDto) throws IOException {
+        return repository.containsColumns(containsColumnDto.getNamespace(), containsColumnDto.getTableName(), containsColumnDto.getRow(), containsColumnDto.getColumnFamily(), containsColumnDto.getColumnQualifier());
     }
 
     public List<Result> scanTable(ScanTableDto scanTableDto) throws IOException {
@@ -78,5 +100,3 @@ public class HBaseCrudService {
     }
 
 }
-
-//getrow
